@@ -22,8 +22,6 @@
 //For bl2 uuid
 #include <tools_share/firmware_image_package.h>
 
-static int open_memmap(const uintptr_t spec);
-
 struct plat_io_policy {
 	uintptr_t *dev_handle;
 	uintptr_t image_spec;
@@ -44,25 +42,9 @@ static const struct plat_io_policy policies[] = {
 	[BL2_IMAGE_ID] = {
 		&memmap_dev_handle,
 		(uintptr_t)&bl2_uuid_spec,
-		open_memmap
+		NULL, //memory no need to check
 	},
 };
-
-static int open_memmap(const uintptr_t spec)
-{
-	int result;
-	uintptr_t local_image_handle;
-
-	result = io_dev_init(memmap_dev_handle, (uintptr_t)NULL);
-	if (result == 0) {
-		result = io_open(memmap_dev_handle, spec, &local_image_handle);
-		if (result == 0) {
-			VERBOSE("Using Memmap\n");
-			io_close(local_image_handle);
-		}
-	}
-	return result;
-}
 
 void a15_io_setup(void)
 {
@@ -87,19 +69,15 @@ void a15_io_setup(void)
 int plat_get_image_source(unsigned int image_id, uintptr_t *dev_handle,
 			  uintptr_t *image_spec)
 {
-	int result;
+	int result = 0;
 	const struct plat_io_policy *policy;
 
 	assert(image_id < ARRAY_SIZE(policies));
 
 	policy = &policies[image_id];
-	result = policy->check(policy->image_spec);
-	if (result == 0) {
-		*image_spec = policy->image_spec;
-		*dev_handle = *(policy->dev_handle);
-	} else {
-		VERBOSE("Trying alternative IO\n");
-	}
+
+	*image_spec = policy->image_spec;
+	*dev_handle = *(policy->dev_handle);
 
 	return result;
 }
