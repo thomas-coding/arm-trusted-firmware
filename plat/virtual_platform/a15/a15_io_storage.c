@@ -37,11 +37,21 @@ static const io_block_spec_t bl2_uuid_spec = {
 	.length = BL2_BINARY_SIZE,
 };
 
+static const io_block_spec_t bl32_uuid_spec = {
+	.offset = BL32_BINARY_BASE,
+	.length = BL32_BINARY_SIZE,
+};
+
 /* By default, virtual platform platforms load images from the FIP */
 static const struct plat_io_policy policies[] = {
 	[BL2_IMAGE_ID] = {
 		&memmap_dev_handle,
 		(uintptr_t)&bl2_uuid_spec,
+		NULL, //memory no need to check
+	},
+	[BL32_IMAGE_ID] = {
+		&memmap_dev_handle,
+		(uintptr_t)&bl32_uuid_spec,
 		NULL, //memory no need to check
 	},
 };

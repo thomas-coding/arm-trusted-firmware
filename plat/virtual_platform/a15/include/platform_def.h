@@ -25,12 +25,14 @@
  *  FLASH binary
  *  0x00000000 .. 0x00100000 : BL1 binary (1M)
  *  0x00100000 .. 0x001fffff : BL2 binary (1M)
+ *  0x00200000 .. 0x002fffff : BL32 binary (1M)
  *
  *  RAM (4M)
  *  0x10300000 .. 0x103fffff : BL1 RW RAM (top 1M)
  *  0x102f0000 .. 0x102fffff : Shared RW RAM (4k)
  *  SPACE
  *  0x10000000 .. 0x100fffff : BL2 Runing RAM (1M)
+ *  0x10100000 .. 0x101fffff : BL32 Runing RAM (1M)
  */
 
 #define PLATFORM_CORE_COUNT	U(1)
@@ -71,6 +73,15 @@
 #define BL2_BASE			UL(0x10000000)
 #define BL2_SIZE			UL(1024 * 1024)
 #define BL2_LIMIT			(BL2_BASE + BL2_SIZE)
+
+/* BL32 1M FLASH and SRAM */
+#define BL32_BINARY_BASE			UL(0x00200000)
+#define BL32_BINARY_SIZE			UL(1024 * 1024)
+#define BL32_BINARY_LIMIT		(BL32_BINARY_BASE + BL32_BINARY_SIZE)
+
+#define BL32_BASE			UL(0x10100000)
+#define BL32_SIZE			UL(1024 * 1024)
+#define BL32_LIMIT			(BL32_BASE + BL32_SIZE)
 
 //TODO
 #define CACHE_WRITEBACK_GRANULE		64
