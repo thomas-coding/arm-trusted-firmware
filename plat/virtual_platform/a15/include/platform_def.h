@@ -28,6 +28,8 @@
  *
  *  RAM (4M)
  *  0x10300000 .. 0x103fffff : BL1 RW RAM (top 1M)
+ *  0x102f0000 .. 0x102fffff : Shared RW RAM (4k)
+ *  SPACE
  *  0x10000000 .. 0x100fffff : BL2 Runing RAM (1M)
  */
 
@@ -51,6 +53,10 @@
 #define BL1_RW_BASE			UL(0x10300000)
 #define BL1_RW_SIZE			UL(1024 * 1024)
 #define BL1_RW_LIMIT		(BL1_RW_BASE + BL1_RW_SIZE)
+
+#define BL_SHARE_MEM_SIZE		(4 * 1024)
+#define BL_SHARE_MEM_BASE		(BL1_RW_BASE - BL_SHARE_MEM_SIZE)
+#define BL_SHARE_LIMIT			(BL1_RW_BASE)
 
 /* BL1 1M FLASH*/
 #define BL1_RO_BASE			UL(0x00000000)
