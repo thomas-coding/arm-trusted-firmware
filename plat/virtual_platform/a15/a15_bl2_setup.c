@@ -15,6 +15,42 @@
 //For io_setup function
 #include <a15_private.h>
 
+//For mmu
+#include <lib/xlat_tables/xlat_tables_v2.h>
+#define MAP_UART	MAP_REGION_FLAT(PL011_UART0_BASE,	\
+					PL011_UART_SIZE,	\
+					MT_DEVICE | MT_RW | MT_SECURE)
+
+#define MAP_FLASH	MAP_REGION_FLAT(BL_FLASH_BASE,	\
+					BL_FLASH_SIZE,	\
+					MT_MEMORY | MT_RO | MT_SECURE)
+
+static const mmap_region_t plat_a15_mmap[] = {
+	MAP_UART,
+	MAP_FLASH,
+	{0}
+};
+
+/* Now only config ram and mmap */
+void a15_configure_mmu_svc_mon(unsigned long total_base,
+					unsigned long total_size)
+{
+	/* define all sram to rw/memroy/secure */
+	mmap_add_region(total_base, total_base,
+			total_size,
+			MT_MEMORY | MT_RW | MT_SECURE);
+
+	/* re-define code sram to ro/memory/secure, because only ro can execute */
+	mmap_add_region(BL_CODE_BASE, BL_CODE_BASE,
+			BL_CODE_END - BL_CODE_BASE,
+			MT_CODE | MT_SECURE);
+
+	/* add others */
+	mmap_add(plat_a15_mmap);
+	init_xlat_tables();
+	enable_mmu_svc_mon(0);
+}
+
 static console_t console;
 
 /*******************************************************************************
@@ -63,5 +99,5 @@ void bl2_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 
 void bl2_plat_arch_setup(void)
 {
-
+	a15_configure_mmu_svc_mon(BL_RAM_BASE, BL_RAM_SIZE);
 }
