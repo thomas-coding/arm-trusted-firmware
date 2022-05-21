@@ -15,6 +15,33 @@
 	.globl	plat_crash_console_putc
 	.globl	plat_crash_console_flush
 
+	/* For sp-min */
+	.globl	plat_arm_calc_core_pos
+	.globl	plat_my_core_pos
+
+	/* -----------------------------------------------------
+	 *  unsigned int plat_my_core_pos(void)
+	 *  This function uses the plat_arm_calc_core_pos()
+	 *  definition to get the index of the calling CPU.
+	 * -----------------------------------------------------
+	 */
+func plat_my_core_pos
+	ldcopr	r0, MPIDR
+	b	plat_arm_calc_core_pos
+endfunc plat_my_core_pos
+
+	/* -----------------------------------------------------
+	 *  unsigned int plat_arm_calc_core_pos(uint64_t mpidr)
+	 *  Helper function to calculate the core position.
+	 *  With this function: CorePos = CoreId
+	 * -----------------------------------------------------
+	 */
+func plat_arm_calc_core_pos
+	and	r0, r0, #MPIDR_CPU_MASK
+	bx	lr
+endfunc plat_arm_calc_core_pos
+
+
 	/* ---------------------------------------------------------------------
 	 * unsigned long plat_get_my_entrypoint (void);
 	 *
