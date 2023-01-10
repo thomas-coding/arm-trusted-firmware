@@ -15,47 +15,15 @@
 //For io_setup function
 #include <a55_private.h>
 
-//For mmu
-#include <lib/xlat_tables/xlat_tables_v2.h>
-#define MAP_UART	MAP_REGION_FLAT(PLAT_A55_UART_BASE,	\
-					PLAT_A55_UART_SIZE,	\
-					MT_DEVICE | MT_RW | MT_SECURE)
-
-#define MAP_FLASH	MAP_REGION_FLAT(BL_FLASH_BASE,	\
-					BL_FLASH_SIZE,	\
-					MT_MEMORY | MT_RO | MT_SECURE)
-
-static const mmap_region_t plat_a55_mmap[] = {
-	MAP_UART,
-	MAP_FLASH,
-	{0}
-};
-
-/* Now only config ram and mmap */
-void a55_configure_mmu_svc_mon(unsigned long total_base,
-					unsigned long total_size)
-{
-	/* define all sram to rw/memroy/secure */
-	mmap_add_region(total_base, total_base,
-			total_size,
-			MT_MEMORY | MT_RW | MT_SECURE);
-
-	/* re-define code sram to ro/memory/secure, because only ro can execute */
-	mmap_add_region(BL_CODE_BASE, BL_CODE_BASE,
-			BL_CODE_END - BL_CODE_BASE,
-			MT_CODE | MT_SECURE);
-
-	/* add others */
-	mmap_add(plat_a55_mmap);
-	init_xlat_tables();
-	enable_mmu(0);
-}
-
 static console_t console;
 
-/*******************************************************************************
- * This function returns the list of loadable images.
- ******************************************************************************/
+/* Data structure which holds the extents of the trusted SRAM for BL1*/
+static meminfo_t bl2_tzram_layout;
+struct meminfo *bl2_plat_sec_mem_layout(void)
+{
+    return &bl2_tzram_layout;
+}
+
 /*******************************************************************************
  * This function returns the list of loadable images.
  ******************************************************************************/
@@ -95,11 +63,30 @@ void bl2_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 			PLAT_A55_UART_CLK_IN_HZ,
 			PLAT_A55_BAUDRATE,
 			&console);
+
+	console_set_scope(&console,
+			CONSOLE_FLAG_BOOT | CONSOLE_FLAG_RUNTIME);
+
+	/* Allow BL1 to see the whole Trusted RAM */
+	bl2_tzram_layout.total_base = BL_RAM_BASE;
+	bl2_tzram_layout.total_size = BL_RAM_SIZE;
+
 	NOTICE("BL2: From bl1 arg0:0x%lx arg1:0x%lx arg2:0x%lx arg3:0x%lx\n", 
 		arg0, arg1, arg2, arg3);
 }
 
+#if BL2_AT_EL3
+void bl2_el3_plat_arch_setup(void)
+{
+	a55_configure_mmu_el3(bl2_tzram_layout.total_base,
+				 bl2_tzram_layout.total_size,
+				 BL_CODE_BASE, BL_CODE_END);
+}
+#else
 void bl2_plat_arch_setup(void)
 {
-	a55_configure_mmu_svc_mon(BL_RAM_BASE, BL_RAM_SIZE);
+	a55_configure_mmu_el1(bl2_tzram_layout.total_base,
+				 bl2_tzram_layout.total_size,
+				 BL_CODE_BASE, BL_CODE_END);
 }
+#endif

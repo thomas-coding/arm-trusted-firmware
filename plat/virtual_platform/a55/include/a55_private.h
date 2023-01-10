@@ -10,6 +10,12 @@
 #ifndef A55_PRIVATE_H
 #define A55_PRIVATE_H
 
+void a55_configure_mmu_el1(unsigned long total_base, unsigned long total_size,
+			unsigned long code_start, unsigned long code_limit);
+
+void a55_configure_mmu_el3(unsigned long total_base, unsigned long total_size,
+			unsigned long code_start, unsigned long code_limit);
+
 void a55_io_setup(void);
 
 #endif /* A55_PRIVATE_H */

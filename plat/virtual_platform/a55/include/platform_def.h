@@ -37,20 +37,19 @@
  *  0x21000000 .. 0x21ffffff : Binary location(load by kermit)
  */
 
-#define PLATFORM_CORE_COUNT	U(1)
-
 #define PLATFORM_STACK_SIZE		0x1000
 
-//TODO
-#define PLAT_MAX_OFF_STATE		U(2)
-#define PLAT_MAX_RET_STATE		U(1)
-#define PLAT_MAX_PWR_LVL		U(1)
+/* Core Clock Configurations */
+#define PLAT_A55_OSC_CLK		24000000
 
 #define BL_RAM_BASE			UL(0x20000000)
 #define BL_RAM_SIZE			UL(32 * 1024 * 1024)
 
 #define BL_FLASH_BASE			UL(0x10000000)
 #define BL_FLASH_SIZE			UL(32 * 1024 * 1024)
+
+#define BL_DDR_BASE			UL(0x30000000)
+#define BL_DDR_SIZE			UL(0x10000000)
 
 /* BL1 1M SRAM */
 /* bl1_calc_bl2_mem_layout assuming this is on top */
@@ -72,34 +71,31 @@
 #define BL2_SIZE			UL(1024 * 1024)
 #define BL2_LIMIT			(BL2_BASE + BL2_SIZE)
 
-/* BL32(sp min) 1M SRAM */
-#define BL32_BASE			UL(0x20100000)
+/* BL31 1M SRAM */
+#define BL31_BASE			UL(0x20100000)
+#define BL31_SIZE			UL(1024 * 1024)
+#define BL31_LIMIT			(BL31_BASE + BL31_SIZE)
+
+/* BL32(optee) 1M SRAM */
+#define BL32_BASE			UL(0x30000000)
 #define BL32_SIZE			UL(1024 * 1024)
 #define BL32_LIMIT			(BL32_BASE + BL32_SIZE)
 
 /* BL33(uboot) 1M SRAM*/
-#define BL33_BASE			UL(0x30000000)
-#define BL33_SIZE			UL(1024 * 1024)
-#define BL33_LIMIT			(BL32_BASE + BL32_SIZE)
+#define BL33_BASE			UL(0x31000000)
+#define BL33_SIZE			UL(4 * 1024 * 1024)
+#define BL33_LIMIT			(BL33_BASE + BL33_SIZE)
 
 /* Binary memory layout (for kermit load) */
-#define BL2_BINARY_BASE			UL(0x21000000)
-#define BL2_BINARY_SIZE			UL(1024 * 1024)
-#define BL2_BINARY_LIMIT		(BL2_BINARY_BASE + BL2_BINARY_SIZE)
+#define PLAT_A55_FIP_MEM_BASE	UL(0x21000000)
+#define PLAT_A55_FIP_MEM_SIZE	UL(4 * 1024 * 1024)
+#define PLAT_A55_FIP_MEM_LIMIT	(PLAT_A55_FIP_MEM_BASE + PLAT_A55_FIP_MEM_LIMIT)
 
-#define BL32_BINARY_BASE			UL(0x22000000)
-#define BL32_BINARY_SIZE			UL(1024 * 1024)
-#define BL32_BINARY_LIMIT		(BL32_BINARY_BASE + BL32_BINARY_SIZE)
-
-#define BL33_BINARY_BASE			UL(0x22000000)
-#define BL33_BINARY_SIZE			UL(1024 * 1024)
-#define BL33_BINARY_LIMIT		(BL32_BINARY_BASE + BL32_BINARY_SIZE)
+#define A55_OPTEE_PAGEABLE_LOAD_BASE	UL(0x30000000)
+#define A55_OPTEE_PAGEABLE_LOAD_SIZE UL(8 * 1024 * 1024)
 
 //TODO
 #define CACHE_WRITEBACK_GRANULE		64
-
-//TODO
-#define PLAT_PRIMARY_CPU			0x0
 
 //TODO
 #define MAX_IO_HANDLES			7
@@ -159,7 +155,21 @@
 
 #define PLAT_ARM_G0_IRQ_PROPS(grp)
 
-/* sp min */
+/* DynamIQ */
 #define PLATFORM_CLUSTER_COUNT		1
+#define PLATFORM_CORE_COUNT		8
+
+#define PLAT_MAX_CPUS_PER_CLUSTER	8
+#define PLAT_MAX_PE_PER_CPU		1
+#define PLAT_PRIMARY_CPU		0x0
+
+/* TODO */
+/* Dummy Power Management */
+#define PWRC_BASE			0x1c100000
+#define PLAT_NUM_PWR_DOMAINS		(1 + PLATFORM_CLUSTER_COUNT + \
+					 PLATFORM_CORE_COUNT)
+#define PLAT_MAX_PWR_LVL		U(2)
+#define PLAT_MAX_OFF_STATE		U(2)
+#define PLAT_MAX_RET_STATE		U(1)
 
 #endif /* PLATFORM_DEF_H */

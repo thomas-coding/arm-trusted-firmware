@@ -23,19 +23,8 @@
 //For bl1_plat_get_image_desc function
 #include <plat/common/platform.h>
 
-#define MAP_UART	MAP_REGION_FLAT(PLAT_A55_UART_BASE,	\
-					PLAT_A55_UART_SIZE,	\
-					MT_DEVICE | MT_RW | MT_SECURE)
-
-#define MAP_FLASH	MAP_REGION_FLAT(BL_FLASH_BASE,	\
-					BL_FLASH_SIZE,	\
-					MT_MEMORY | MT_RO | MT_SECURE)
-
-static const mmap_region_t plat_a55_mmap[] = {
-	MAP_UART,
-	MAP_FLASH,
-	{0}
-};
+//For mmu config
+#include <a55_private.h>
 
 static console_t console;
 
@@ -43,20 +32,7 @@ static console_t console;
 static meminfo_t bl1_tzram_layout;
 struct meminfo *bl1_plat_sec_mem_layout(void)
 {
-	return &bl1_tzram_layout;
-}
-
-/* Now only config ram and mmap */
-void a55_configure_mmu_svc_mon(unsigned long total_base,
-					unsigned long total_size)
-{
-	mmap_add_region(total_base, total_base,
-			total_size,
-			MT_MEMORY | MT_RW | MT_SECURE);
-
-	mmap_add(plat_a55_mmap);
-	init_xlat_tables();
-	enable_mmu(0);
+    return &bl1_tzram_layout;
 }
 
 /*******************************************************************************
@@ -83,8 +59,8 @@ void bl1_platform_setup(void)
 
 void bl1_plat_arch_setup(void)
 {
-	a55_configure_mmu_svc_mon(bl1_tzram_layout.total_base,
-				bl1_tzram_layout.total_size);
+	a55_configure_mmu_el3(bl1_tzram_layout.total_base, bl1_tzram_layout.total_size,
+				BL_CODE_BASE, BL1_CODE_END);
 }
 
 /*
