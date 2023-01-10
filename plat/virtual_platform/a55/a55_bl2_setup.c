@@ -9,6 +9,12 @@
 #include <common/debug.h>
 #include <drivers/console.h>
 #include <platform_def.h>
+
+#include <assert.h>
+#ifdef SPD_opteed
+#include <lib/optee_utils.h>
+#endif
+
 //For uart
 #include <uart_16550.h>
 
@@ -90,3 +96,47 @@ void bl2_plat_arch_setup(void)
 				 BL_CODE_BASE, BL_CODE_END);
 }
 #endif
+
+static int a55_bl2_handle_post_image_load(unsigned int image_id)
+{
+	int err = 0;
+	bl_mem_params_node_t *bl_mem_params = get_bl_mem_params_node(image_id);
+
+	assert(bl_mem_params);
+	switch (image_id) {
+		case BL32_IMAGE_ID:
+		{
+	#ifdef SPD_opteed
+			bl_mem_params_node_t *pager_mem_params = NULL;
+			bl_mem_params_node_t *paged_mem_params = NULL;
+
+			pager_mem_params = get_bl_mem_params_node(BL32_EXTRA1_IMAGE_ID);
+			assert(pager_mem_params);
+
+			paged_mem_params = get_bl_mem_params_node(BL32_EXTRA2_IMAGE_ID);
+			assert(paged_mem_params);
+
+			err = parse_optee_header(&bl_mem_params->ep_info,
+					&pager_mem_params->image_info,
+					&paged_mem_params->image_info);
+			if (err != 0)
+				WARN("OPTEE header parse error.\n");
+	#endif
+			break;
+		}
+		default:
+			/* Do nothing in default case */
+			break;
+	}
+
+	return err;
+}
+
+/*******************************************************************************
+ * This function can be used by the platforms to update/use image
+ * information for given `image_id`.
+ ******************************************************************************/
+int bl2_plat_handle_post_image_load(unsigned int image_id)
+{
+	return a55_bl2_handle_post_image_load(image_id);
+}
