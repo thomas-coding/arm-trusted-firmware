@@ -79,3 +79,55 @@ unsigned int plat_get_syscnt_freq2(void)
 {
 	return PLAT_A55_OSC_CLK;
 }
+
+uint32_t a55_get_spsr_for_bl33_entry(void)
+{
+	unsigned int mode;
+	uint32_t spsr;
+
+	/* Figure out what mode we enter the non-secure world in */
+	mode = (el_implemented(2) != EL_IMPL_NONE) ? MODE_EL2 : MODE_EL1;
+
+	/*
+	 * TODO: Consider the possibility of specifying the SPSR in
+	 * the FIP ToC and allowing the platform to have a say as
+	 * well.
+	 */
+	spsr = SPSR_64(mode, MODE_SP_ELX, DISABLE_ALL_EXCEPTIONS);
+	return spsr;
+}
+
+#include <common/debug.h>
+
+/*
+ * Show necessary register information in exception.
+ */
+void a55_report_exception(unsigned int exception_type)
+{
+	uint8_t el = get_current_el();
+	uint64_t spsr = 0;
+	uint64_t elr = 0;
+	uint64_t esr = 0;
+	uint64_t far = 0;
+
+	ERROR("*********************************************\n");
+	ERROR("Exception: type 0x%x\n", exception_type);
+	ERROR("\tCurrent exception level: EL%d\n", el);
+	if (IS_IN_EL1()) {
+		spsr = read_spsr_el1();
+		elr = read_elr_el1();
+		esr = read_esr_el1();
+		far = read_far_el1();
+	} else if (IS_IN_EL3()) {
+		spsr = read_spsr_el3();
+		elr = read_elr_el3();
+		esr = read_esr_el3();
+		far = read_far_el3();
+	} else {
+		ERROR("\tNeither in EL1 nor EL3.\n");
+	}
+	ERROR("\tSPSR_EL%d:\t0x%016lx\n", el, spsr);
+	ERROR("\tELR_EL%d:\t0x%016lx\n", el, elr);
+	ERROR("\tESR_EL%d:\t0x%016lx\n", el, esr);
+	ERROR("\tFAR_EL%d:\t0x%016lx\n", el, far);
+}

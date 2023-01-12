@@ -70,9 +70,6 @@ void bl2_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 			PLAT_A55_BAUDRATE,
 			&console);
 
-	console_set_scope(&console,
-			CONSOLE_FLAG_BOOT | CONSOLE_FLAG_RUNTIME);
-
 	/* Allow BL1 to see the whole Trusted RAM */
 	bl2_tzram_layout.total_base = BL_RAM_BASE;
 	bl2_tzram_layout.total_size = BL_RAM_SIZE;
@@ -122,6 +119,13 @@ static int a55_bl2_handle_post_image_load(unsigned int image_id)
 			if (err != 0)
 				WARN("OPTEE header parse error.\n");
 	#endif
+			break;
+		}
+		case BL33_IMAGE_ID:
+		{
+			/* BL33 expects to receive the primary CPU MPID (through r0) */
+			bl_mem_params->ep_info.args.arg0 = 0xffff & read_mpidr();
+			bl_mem_params->ep_info.spsr = a55_get_spsr_for_bl33_entry();
 			break;
 		}
 		default:

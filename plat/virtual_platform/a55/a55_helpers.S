@@ -153,6 +153,17 @@ endfunc plat_invalidate_icache_all
 	 * ----------------------------------------------------------
 	 */
 func plat_report_exception
+#ifdef IMAGE_BL1
+	msr	spsel, #MODE_SP_EL0
+#endif
+	/* exit if SP is not initialized, we can't call c function */
+	cmp	sp, #0
+	beq	report_exit
+	bl	a55_report_exception
+report_exit:
+#ifdef IMAGE_BL1
+	msr	spsel, #MODE_SP_ELX
+#endif
 	ret
 endfunc plat_report_exception
 

@@ -18,4 +18,6 @@ void a55_configure_mmu_el3(unsigned long total_base, unsigned long total_size,
 
 void a55_io_setup(void);
 
+uint32_t a55_get_spsr_for_bl33_entry(void);
+
 #endif /* A55_PRIVATE_H */

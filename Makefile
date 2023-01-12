@@ -320,7 +320,12 @@ ifneq (${DEBUG}, 0)
 else
         BUILD_TYPE	:=	release
         # Use LOG_LEVEL_NOTICE by default for release builds
-        LOG_LEVEL	:=	20
+#        LOG_LEVEL	:=	20
+        TF_CFLAGS	+=	-g -gdwarf-4
+        ASFLAGS		+=	-g -Wa,-gdwarf-4
+
+        # Use LOG_LEVEL_INFO by default for debug builds
+        LOG_LEVEL	:=	40
 endif
 
 # Default build string (git branch and commit)
