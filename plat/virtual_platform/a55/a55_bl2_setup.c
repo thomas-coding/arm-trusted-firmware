@@ -64,15 +64,16 @@ void bl2_platform_setup(void)
 void bl2_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 				u_register_t arg2, u_register_t arg3)
 {
+	meminfo_t *mem_layout = (void *)arg1;
+
 	/* Initialize the console to provide early debug support */
 	console_16550_register(PLAT_A55_UART_BASE,
 			PLAT_A55_UART_CLK_IN_HZ,
 			PLAT_A55_BAUDRATE,
 			&console);
 
-	/* Allow BL1 to see the whole Trusted RAM */
-	bl2_tzram_layout.total_base = BL_RAM_BASE;
-	bl2_tzram_layout.total_size = BL_RAM_SIZE;
+	/* Setup the BL2 memory layout, get it form BL1 (sram_base - bl1_base) */
+	bl2_tzram_layout = *mem_layout;
 
 	NOTICE("BL2: From bl1 arg0:0x%lx arg1:0x%lx arg2:0x%lx arg3:0x%lx\n", 
 		arg0, arg1, arg2, arg3);

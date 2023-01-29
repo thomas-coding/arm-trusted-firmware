@@ -52,8 +52,8 @@
 #define BL_DDR_SIZE			UL(0x10000000)
 
 /* BL1 1M SRAM */
-/* bl1_calc_bl2_mem_layout assuming this is on top */
-#define BL1_RW_BASE			UL(0x20300000)
+/* bl1_calc_bl2_mem_layout assuming this is on sram top */
+#define BL1_RW_BASE			(BL_RAM_BASE + BL_RAM_SIZE - 1024 * 1024)
 #define BL1_RW_SIZE			UL(1024 * 1024)
 #define BL1_RW_LIMIT		(BL1_RW_BASE + BL1_RW_SIZE)
 
