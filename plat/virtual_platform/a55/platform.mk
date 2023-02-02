@@ -19,6 +19,7 @@ include lib/xlat_tables_v2/xlat_tables.mk
 PLAT_BL_COMMON_SOURCES	+=      ${XLAT_TABLES_LIB_SRCS}
 
 PLAT_INCLUDES		:=	-Iplat/virtual_platform/a55/include	\
+						-Iinclude/plat/arm/common/			\
 						-Iinclude/drivers/arm				\
 						-Iinclude/drivers/ti/uart			\
 						-Iinclude/drivers/io	\
@@ -52,8 +53,8 @@ include drivers/arm/gic/v3/gicv3.mk
 
 A55_GIC_SOURCES		+=	\
 				${GICV3_SOURCES}			\
-				plat/common/plat_gicv3.c
-
+				plat/common/plat_gicv3.c	\
+				plat/arm/common/arm_gicv3.c
 
 BL31_SOURCES		+=	\
 				plat/virtual_platform/a55/a55_helpers.S	\

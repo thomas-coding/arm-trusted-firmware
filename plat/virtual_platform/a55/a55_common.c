@@ -23,6 +23,14 @@
 					BL_DDR_SIZE,	\
 					MT_MEMORY | MT_RW | MT_SECURE)
 
+#define MAP_GICD	MAP_REGION_FLAT(PLAT_ARM_GICD_BASE,		\
+					PLAT_ARM_GICD_SIZE,		\
+					MT_DEVICE | MT_RW | MT_SECURE)
+
+#define MAP_GICR	MAP_REGION_FLAT(PLAT_ARM_GICR_BASE,		\
+					PLAT_ARM_GICR_SIZE,		\
+					MT_DEVICE | MT_RW | MT_SECURE)
+
 #ifdef IMAGE_BL1
 static const mmap_region_t plat_a55_mmap[] = {
 	MAP_UART,
@@ -45,6 +53,8 @@ static const mmap_region_t plat_a55_mmap[] = {
 	MAP_UART,
 	MAP_FLASH,
 	MAP_DDR,
+	MAP_GICD,
+	MAP_GICR,
 	{0}
 };
 #endif

@@ -16,6 +16,9 @@
 //For io_setup function
 #include <a55_private.h>
 
+//For gic
+#include <plat_arm.h>
+
 static entry_point_info_t bl32_image_ep_info;
 static entry_point_info_t bl33_image_ep_info;
 
@@ -70,7 +73,9 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 
 void bl31_platform_setup(void)
 {
-
+	/* Initialize the GIC driver, cpu and distributor interfaces */
+	plat_arm_gic_driver_init();
+	plat_arm_gic_init();
 }
 
 /*
