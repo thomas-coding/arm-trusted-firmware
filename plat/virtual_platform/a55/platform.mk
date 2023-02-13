@@ -83,3 +83,9 @@ endif
 ifneq ($(BL32_EXTRA2),)
 $(eval $(call TOOL_ADD_IMG,BL32_EXTRA2,--tos-fw-extra2))
 endif
+
+# Add secure boot
+PLAT_PATH := plat/virtual_platform/a55
+ifeq (${TRUSTED_BOARD_BOOT}, 1)
+  include ${PLAT_PATH}/tbbr/a55_tbbr.mk
+endif
