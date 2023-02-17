@@ -1,6 +1,6 @@
 # !/bin/sh
 #
-# A script to generate developmet Root Keys for Alius platform.
+# A script to generate developmet Root Keys for a55 platform.
 #
 # This scripts is based on plat\arm\board\common\protpk\README
 # The key is only used to development.

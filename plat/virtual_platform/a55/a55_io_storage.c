@@ -1,5 +1,5 @@
 /*
- * IO storage settings for Alius platform.
+ * IO storage settings for a55 platform.
  *
  * Maintainer: Liuwei <Wei.Liu@verisilicon.com>
  *
@@ -24,6 +24,12 @@
 
 //For bl2 uuid
 #include <tools_share/firmware_image_package.h>
+
+// for cert
+#if SECURE_DEBUG
+#include "plat_def_fip_uuid.h"
+#include "secure_debug.h"
+#endif
 
 static int check_fip(const uintptr_t spec);
 static int check_memmap(const uintptr_t spec);
@@ -111,6 +117,12 @@ static const io_uuid_spec_t nt_fw_cert_uuid_spec = {
 };
 #endif
 
+#if SECURE_DEBUG
+static const io_uuid_spec_t secure_debug_cert_uuid_spec = {
+	.uuid = UUID_SECURE_DEBUG_CERT,
+};
+#endif
+
 /* By default, virtual platform platforms load images from the FIP */
 static const struct plat_io_policy policies[] = {
 	/* Fip binary load from memory */
@@ -131,6 +143,13 @@ static const struct plat_io_policy policies[] = {
 		(uintptr_t)&bl2_uuid_spec,
 		check_fip,
 	},
+#if SECURE_DEBUG
+	[SECURE_DEBUG_CERT_IMAGE_ID] = {
+		&fip_dev_handle,
+		(uintptr_t)&secure_debug_cert_uuid_spec,
+		check_fip,
+	},
+#endif
 #if ENCRYPT_BL31 && !defined(DECRYPTION_SUPPORT_none)
 	[BL31_IMAGE_ID] = {
 		&enc_dev_handle,

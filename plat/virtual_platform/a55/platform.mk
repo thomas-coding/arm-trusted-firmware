@@ -102,3 +102,9 @@ else
 $(eval $(call TOOL_ADD_IMG,bl32_extra2,--tos-fw-extra2))
 endif
 endif
+
+# Add secure debug
+ifeq (${SECURE_DEBUG}, 1)
+  include ${PLAT_PATH}/secure_debug/secure_debug.mk
+  $(eval $(call add_define,SECURE_DEBUG))
+endif

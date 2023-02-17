@@ -59,6 +59,12 @@ void bl2_platform_setup(void)
 {
 	/* Initialise the IO layer and register platform IO devices */
 	a55_io_setup();
+
+#if SECURE_DEBUG
+	/* Check secure debug */
+	verify_debug_cert();
+#endif
+
 }
 
 void bl2_early_platform_setup2(u_register_t arg0, u_register_t arg1,

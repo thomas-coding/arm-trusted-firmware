@@ -20,4 +20,8 @@ void a55_io_setup(void);
 
 uint32_t a55_get_spsr_for_bl33_entry(void);
 
+#if SECURE_DEBUG
+int verify_debug_cert(void);
+#endif
+
 #endif /* A55_PRIVATE_H */
