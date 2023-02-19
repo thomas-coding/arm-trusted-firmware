@@ -1176,6 +1176,7 @@ $(eval $(call add_defines,\
         ENABLE_SVE_FOR_SWD \
         ENCRYPT_BL31 \
         ENCRYPT_BL32 \
+        ENCRYPT_BL2 \
         ERROR_DEPRECATED \
         FAULT_INJECTION_SUPPORT \
         GICV2_G0_FOR_EL3 \
@@ -1326,8 +1327,13 @@ endif
 
 BL2_SOURCES := $(sort ${BL2_SOURCES})
 
+ifneq (${DECRYPTION_SUPPORT},none)
+$(if ${BL2}, $(eval $(call TOOL_ADD_IMG,bl2,--${FIP_BL2_ARGS},,$(ENCRYPT_BL2))),\
+	$(eval $(call MAKE_BL,bl2,${FIP_BL2_ARGS},,$(ENCRYPT_BL2))))
+else
 $(if ${BL2}, $(eval $(call TOOL_ADD_IMG,bl2,--${FIP_BL2_ARGS})),\
 	$(eval $(call MAKE_BL,bl2,${FIP_BL2_ARGS})))
+endif
 endif
 
 ifeq (${NEED_SCP_BL2},yes)

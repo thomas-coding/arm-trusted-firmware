@@ -138,11 +138,19 @@ static const struct plat_io_policy policies[] = {
 		check_fip
 	},
 #endif
+#if ENCRYPT_BL2 && !defined(DECRYPTION_SUPPORT_none)
+	[BL2_IMAGE_ID] = {
+		&enc_dev_handle,
+		(uintptr_t)&bl2_uuid_spec,
+		check_enc_fip,
+	},
+#else
 	[BL2_IMAGE_ID] = {
 		&fip_dev_handle,
 		(uintptr_t)&bl2_uuid_spec,
 		check_fip,
 	},
+#endif
 #if SECURE_DEBUG
 	[SECURE_DEBUG_CERT_IMAGE_ID] = {
 		&fip_dev_handle,
