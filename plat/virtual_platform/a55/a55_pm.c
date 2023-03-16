@@ -24,7 +24,14 @@ static void a55_cpu_standby(plat_local_state_t cpu_state)
 
 static int a55_pwr_domain_on(u_register_t mpidr)
 {
-	return PSCI_E_SUCCESS;
+	int rc = PSCI_E_SUCCESS;
+	unsigned pos = plat_core_pos_by_mpidr(mpidr);
+	uint64_t *hold_base = (uint64_t *)PLAT_A55_HOLD_BASE;
+
+	hold_base[pos] = PLAT_A55_HOLD_STATE_GO;
+	sev();
+
+	return rc;	
 }
 
 static void a55_pwr_domain_on_finish(const psci_power_state_t *target_state)
@@ -118,6 +125,26 @@ static void a55_get_sys_suspend_power_state(psci_power_state_t *req_state)
 		req_state->pwr_domain_state[i] = PLAT_MAX_OFF_STATE;
 }
 
+/*******************************************************************************
+ * A55 platform function to program the mailbox for a cpu before it is released
+ * from reset. This function assumes that the Trusted mail box base is within
+ * the ARM_SHARED_RAM region
+ ******************************************************************************/
+void plat_a55_program_mailbox(uintptr_t address)
+{
+	uintptr_t *mailbox = (void *) PLAT_A55_MAILBOX_BASE;
+
+	*mailbox = address;
+
+	/*
+	 * Ensure that the PLAT_ARM_TRUSTED_MAILBOX_BASE is within
+	 * ARM_SHARED_RAM region.
+	 */
+	assert((PLAT_A55_MAILBOX_BASE >= BL_SHARE_MEM_BASE) &&
+		((PLAT_A55_MAILBOX_BASE + sizeof(*mailbox)) <= \
+				(BL_SHARE_MEM_BASE + BL_SHARE_MEM_SIZE)));
+}
+
 static plat_psci_ops_t a55_psci_ops = {
 	.cpu_standby			= a55_cpu_standby,
 	.pwr_domain_on 			= a55_pwr_domain_on,
@@ -140,6 +167,9 @@ int plat_setup_psci_ops(uintptr_t sec_entrypoint,
 
 	INFO("%s: sec_entrypoint = 0x%lx\n", __func__,
 		(uintptr_t)sec_entrypoint);
+
+	/* Setup mailbox with entry point. */
+	plat_a55_program_mailbox(sec_entrypoint);
 
 	return 0;
 }

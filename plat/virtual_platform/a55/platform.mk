@@ -5,8 +5,10 @@
 #
 
 # Common Build Options
-PROGRAMMABLE_RESET_ADDRESS := 1
-#COLD_BOOT_SINGLE_CPU := 1
+# Qemu platform all core start at power on and can't set reset vector
+PROGRAMMABLE_RESET_ADDRESS := 0
+COLD_BOOT_SINGLE_CPU := 0
+
 USE_COHERENT_MEM = 0
 HW_ASSISTED_COHERENCY = 1
 #CTX_INCLUDE_AARCH32_REGS = 0
