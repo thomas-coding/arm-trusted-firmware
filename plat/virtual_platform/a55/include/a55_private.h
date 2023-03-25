@@ -24,4 +24,8 @@ uint32_t a55_get_spsr_for_bl33_entry(void);
 int verify_debug_cert(void);
 #endif
 
+
+void a55_boot_device_init(void);
+void a55_generic_timer_init(void);
+
 #endif /* A55_PRIVATE_H */

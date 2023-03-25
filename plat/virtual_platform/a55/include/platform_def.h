@@ -41,6 +41,7 @@
 
 /* Core Clock Configurations */
 #define PLAT_A55_OSC_CLK		24000000
+#define PLAT_A55_CFG_APB_PLL_CLK	200000000
 
 #define BL_RAM_BASE			UL(0x20000000)
 #define BL_RAM_SIZE			UL(32 * 1024 * 1024)
@@ -190,5 +191,10 @@
 #define PLAT_MAX_PWR_LVL		U(2)
 #define PLAT_MAX_OFF_STATE		U(2)
 #define PLAT_MAX_RET_STATE		U(1)
+
+/* SDHCI */
+#define PLAT_A55_SD_BASE		UL(0x70000000)
+#define PLAT_A55_SD_SIZE		UL(0x00010000)
+#define PLAT_A55_SD_CLK_RATE	4000000
 
 #endif /* PLATFORM_DEF_H */

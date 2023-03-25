@@ -26,6 +26,8 @@
 //For mmu config
 #include <a55_private.h>
 
+#include <drivers/mmc.h>
+
 static console_t console;
 
 /* Data structure which holds the extents of the trusted SRAM for BL1*/
@@ -40,6 +42,9 @@ struct meminfo *bl1_plat_sec_mem_layout(void)
  ******************************************************************************/
 void bl1_early_platform_setup(void)
 {
+
+	a55_generic_timer_init();
+
 	/* Initialize the console to provide early debug support */
 	console_16550_register(PLAT_A55_UART_BASE,
 			PLAT_A55_UART_CLK_IN_HZ,
@@ -51,10 +56,23 @@ void bl1_early_platform_setup(void)
 	bl1_tzram_layout.total_size = BL_RAM_SIZE;
 }
 
+#if 0 //test sd read/write
+uint8_t __attribute__((aligned(512)))test_buf[512];
+#endif
+
 void bl1_platform_setup(void)
 {
 	/* Initialise the IO layer and register platform IO devices */
 	a55_io_setup();
+
+	/* Initialize eMMC(or SD) if necessary */
+	a55_boot_device_init();
+
+#if 0
+	memset(test_buf, 0, 512);
+	mmc_read_blocks(40, (uintptr_t)test_buf, MMC_BLOCK_SIZE);
+	mmc_write_blocks(0, (uintptr_t)test_buf, MMC_BLOCK_SIZE);
+#endif
 }
 
 void bl1_plat_arch_setup(void)

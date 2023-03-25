@@ -21,10 +21,13 @@ include lib/xlat_tables_v2/xlat_tables.mk
 PLAT_BL_COMMON_SOURCES	+=      ${XLAT_TABLES_LIB_SRCS}
 
 PLAT_INCLUDES		:=	-Iplat/virtual_platform/a55/include	\
-						-Iinclude/plat/arm/common/			\
+						-Iinclude/plat/arm/common			\
 						-Iinclude/drivers/arm				\
 						-Iinclude/drivers/ti/uart			\
 						-Iinclude/drivers/io	\
+						-Iinclude/drivers/synopsys/mshc		\
+						-Iinclude/drivers					\
+						-Iinclude/lib						\
 						-Iinclude
 
 BL1_SOURCES		+=	plat/virtual_platform/a55/a55_helpers.S	\
@@ -36,6 +39,10 @@ BL1_SOURCES		+=	plat/virtual_platform/a55/a55_helpers.S	\
 					drivers/io/io_storage.c					\
 					drivers/io/io_fip.c					\
 					drivers/io/io_memmap.c				\
+					drivers/synopsys/mshc/dwc_mshc.c	\
+					drivers/mmc/mmc.c					\
+					drivers/delay_timer/generic_delay_timer.c	\
+					drivers/delay_timer/delay_timer.c		\
 					drivers/ti/uart/${ARCH}/16550_console.S
 
 
@@ -46,6 +53,10 @@ BL2_SOURCES		+=	plat/virtual_platform/a55/a55_helpers.S	\
 					drivers/io/io_storage.c					\
 					drivers/io/io_fip.c					\
 					drivers/io/io_memmap.c				\
+					drivers/synopsys/mshc/dwc_mshc.c	\
+					drivers/mmc/mmc.c					\
+					drivers/delay_timer/generic_delay_timer.c	\
+					drivers/delay_timer/delay_timer.c		\
 					common/desc_image_load.c					\
 					plat/virtual_platform/a55/a55_common.c		\
 					plat/virtual_platform/a55/a55_bl2_mem_params_desc.c

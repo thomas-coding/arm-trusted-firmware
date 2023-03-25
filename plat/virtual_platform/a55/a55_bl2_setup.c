@@ -72,6 +72,8 @@ void bl2_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 {
 	meminfo_t *mem_layout = (void *)arg1;
 
+	a55_generic_timer_init();
+
 	/* Initialize the console to provide early debug support */
 	console_16550_register(PLAT_A55_UART_BASE,
 			PLAT_A55_UART_CLK_IN_HZ,

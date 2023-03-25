@@ -7,6 +7,9 @@
 #include <uart_16550.h>
 #include <platform_def.h>
 #include <a55_private.h>
+#include <dwc_mshc.h>
+#include <generic_delay_timer.h>
+#include <delay_timer.h>
 
 //For mmu
 #include <lib/xlat_tables/xlat_tables_v2.h>
@@ -31,10 +34,15 @@
 					PLAT_ARM_GICR_SIZE,		\
 					MT_DEVICE | MT_RW | MT_SECURE)
 
+#define MAP_SD		MAP_REGION_FLAT(PLAT_A55_SD_BASE,	\
+					PLAT_A55_SD_SIZE,		\
+					MT_DEVICE | MT_RW | MT_SECURE)
+
 #ifdef IMAGE_BL1
 static const mmap_region_t plat_a55_mmap[] = {
 	MAP_UART,
 	MAP_FLASH,
+	MAP_SD,
 	{0}
 };
 #endif
@@ -44,6 +52,7 @@ static const mmap_region_t plat_a55_mmap[] = {
 	MAP_UART,
 	MAP_FLASH,
 	MAP_DDR,
+	MAP_SD,
 	{0}
 };
 #endif
@@ -55,6 +64,7 @@ static const mmap_region_t plat_a55_mmap[] = {
 	MAP_DDR,
 	MAP_GICD,
 	MAP_GICR,
+	MAP_SD,
 	{0}
 };
 #endif
@@ -140,4 +150,61 @@ void a55_report_exception(unsigned int exception_type)
 	ERROR("\tELR_EL%d:\t0x%016lx\n", el, elr);
 	ERROR("\tESR_EL%d:\t0x%016lx\n", el, esr);
 	ERROR("\tFAR_EL%d:\t0x%016lx\n", el, far);
+}
+
+bool is_sd_boot(void)
+{
+	return true;
+}
+
+static void a55_mshci_phy_init(uintptr_t base)
+{
+	NOTICE("sd phy init, nothing to do on QEMU platform\n");
+	return;
+}
+
+void a55_mshc_init(enum mmc_device_type type)
+{
+	dwc_mshc_params_t params;
+
+	NOTICE("a55_mshc_init begin\n");
+	memset(&params, 0, sizeof(dwc_mshc_params_t));
+
+	params.base_clk = PLAT_A55_CFG_APB_PLL_CLK;
+	params.reg_base = PLAT_A55_SD_BASE;
+	params.bus_width = MMC_BUS_WIDTH_4;
+	params.plat_init = a55_mshci_phy_init;
+	params.clk_rate = PLAT_A55_SD_CLK_RATE;
+
+	/* CMD23 is not supported on QEMU Platform */
+	//params.flags = MMC_FLAG_CMD23;
+
+	params.info.mmc_dev_type = type;
+	params.info.ocr_voltage = OCR_2_9_3_0 | OCR_3_0_3_1 |
+				  OCR_3_3_3_4 | OCR_3_2_3_3;
+
+	dwc_mshc_init(&params);
+	NOTICE("a55_mshc_init done\n");
+}
+
+void a55_boot_device_init(void)
+{
+	if (is_sd_boot()) {
+		NOTICE("SD Boot Mode\n");
+		a55_mshc_init(MMC_IS_SD);
+	} else {
+		NOTICE("Memory Boot Mode\n");
+	}
+}
+
+void a55_generic_timer_init(void)
+{
+#if IMAGE_BL1
+	write_cntfrq_el0(plat_get_syscnt_freq2());
+#endif
+	/*
+	 * NOTE: With ASIC platform, if timer PLL settings changed by PMC at
+	 * BL2 stage. Needs to re-configure frequence here.
+	 */
+	generic_delay_timer_init();
 }
