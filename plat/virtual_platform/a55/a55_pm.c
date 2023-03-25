@@ -8,6 +8,9 @@
 #include <lib/psci/psci.h>
 #include <plat/common/platform.h>
 #include <platform_def.h>
+#include <gicv3.h>
+#include <plat_arm.h>
+#include <plat/arm/common/plat_arm.h>
 
 static void a55_cpu_standby(plat_local_state_t cpu_state)
 {
@@ -31,17 +34,23 @@ static int a55_pwr_domain_on(u_register_t mpidr)
 	hold_base[pos] = PLAT_A55_HOLD_STATE_GO;
 	sev();
 
+	/* Here we can call scp to power on cpu */
+
 	return rc;	
 }
 
 static void a55_pwr_domain_on_finish(const psci_power_state_t *target_state)
 {
-
+	plat_arm_gic_pcpu_init();
+	plat_arm_gic_cpuif_enable();
 }
 
 void a55_pwr_domain_off(const psci_power_state_t *target_state)
 {
+	/* Prevent interrupts from spuriously waking up this cpu */
+	plat_arm_gic_cpuif_disable();
 
+	/* Here we can call scp to power off cpu */
 }
 
 void a55_pwr_domain_suspend(const psci_power_state_t *target_state)
@@ -54,14 +63,20 @@ void a55_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
 
 }
 
+void __dead2 plat_secondary_cold_boot_setup(void);
+
 /*
  * When code comes here, already send system suspend
  * scmi command to PMC. Now the core just enter WFI.
  */
 void __dead2 a55_pwr_domain_pwr_down_wfi(const psci_power_state_t *target_state)
 {
-	while (1)
-		wfi();
+	/* ensure write buffer empty */
+	dsbsy();
+
+	disable_mmu_el3();
+	plat_secondary_cold_boot_setup();
+
 }
 
 void __dead2 a55_system_reset(void)

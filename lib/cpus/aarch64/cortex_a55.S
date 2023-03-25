@@ -294,9 +294,11 @@ func cortex_a55_core_pwr_dwn
 	 * Enable CPU power down bit in power control register
 	 * ---------------------------------------------
 	 */
+	/* TODO: Fixme: Qemu a55 not support thsi register
 	mrs	x0, CORTEX_A55_CPUPWRCTLR_EL1
 	orr	x0, x0, #CORTEX_A55_CORE_PWRDN_EN_MASK
 	msr	CORTEX_A55_CPUPWRCTLR_EL1, x0
+	*/
 	isb
 	ret
 endfunc cortex_a55_core_pwr_dwn
