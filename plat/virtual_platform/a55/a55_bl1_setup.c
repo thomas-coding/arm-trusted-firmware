@@ -65,6 +65,7 @@ void bl1_platform_setup(void)
 	/* Initialise the IO layer and register platform IO devices */
 	a55_io_setup();
 
+	a55_boot_source();
 	/* Initialize eMMC(or SD) if necessary */
 	a55_boot_device_init();
 

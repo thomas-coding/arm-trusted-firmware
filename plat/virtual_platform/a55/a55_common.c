@@ -152,11 +152,6 @@ void a55_report_exception(unsigned int exception_type)
 	ERROR("\tFAR_EL%d:\t0x%016lx\n", el, far);
 }
 
-bool is_sd_boot(void)
-{
-	return true;
-}
-
 static void a55_mshci_phy_init(uintptr_t base)
 {
 	NOTICE("sd phy init, nothing to do on QEMU platform\n");
@@ -167,7 +162,6 @@ void a55_mshc_init(enum mmc_device_type type)
 {
 	dwc_mshc_params_t params;
 
-	NOTICE("a55_mshc_init begin\n");
 	memset(&params, 0, sizeof(dwc_mshc_params_t));
 
 	params.base_clk = PLAT_A55_CFG_APB_PLL_CLK;
@@ -189,12 +183,10 @@ void a55_mshc_init(enum mmc_device_type type)
 
 void a55_boot_device_init(void)
 {
-	if (is_sd_boot()) {
-		NOTICE("SD Boot Mode\n");
-		a55_mshc_init(MMC_IS_SD);
-	} else {
-		NOTICE("Memory Boot Mode\n");
-	}
+#ifdef BOOT_FROM_SD
+	a55_mshc_init(MMC_IS_SD);
+#endif
+	return;
 }
 
 void a55_generic_timer_init(void)

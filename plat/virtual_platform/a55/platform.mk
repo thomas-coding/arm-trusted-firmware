@@ -39,6 +39,7 @@ BL1_SOURCES		+=	plat/virtual_platform/a55/a55_helpers.S	\
 					drivers/io/io_storage.c					\
 					drivers/io/io_fip.c					\
 					drivers/io/io_memmap.c				\
+					drivers/io/io_block.c				\
 					drivers/synopsys/mshc/dwc_mshc.c	\
 					drivers/mmc/mmc.c					\
 					drivers/delay_timer/generic_delay_timer.c	\
@@ -53,6 +54,7 @@ BL2_SOURCES		+=	plat/virtual_platform/a55/a55_helpers.S	\
 					drivers/io/io_storage.c					\
 					drivers/io/io_fip.c					\
 					drivers/io/io_memmap.c				\
+					drivers/io/io_block.c				\
 					drivers/synopsys/mshc/dwc_mshc.c	\
 					drivers/mmc/mmc.c					\
 					drivers/delay_timer/generic_delay_timer.c	\
@@ -120,4 +122,9 @@ endif
 ifeq (${SECURE_DEBUG}, 1)
   include ${PLAT_PATH}/secure_debug/secure_debug.mk
   $(eval $(call add_define,SECURE_DEBUG))
+endif
+
+# Add boot from sd option
+ifeq (${BOOT_FROM_SD}, 1)
+  $(eval $(call add_define,BOOT_FROM_SD))
 endif

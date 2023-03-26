@@ -21,6 +21,8 @@
 #ifndef DECRYPTION_SUPPORT_none
 #include <drivers/io/io_encrypted.h>
 #endif
+#include <io_block.h>
+#include <drivers/mmc.h>
 
 //For bl2 uuid
 #include <tools_share/firmware_image_package.h>
@@ -32,7 +34,11 @@
 #endif
 
 static int check_fip(const uintptr_t spec);
+#ifdef BOOT_FROM_SD
+static int check_sd(const uintptr_t spec);
+#else
 static int check_memmap(const uintptr_t spec);
+#endif
 #ifndef DECRYPTION_SUPPORT_none
 static int check_enc_fip(const uintptr_t spec);
 #endif
@@ -50,14 +56,39 @@ static uintptr_t memmap_dev_handle;
 static const io_dev_connector_t *fip_dev_con;
 static uintptr_t fip_dev_handle;
 
+static const io_dev_connector_t *sd_dev_con;
+static uintptr_t sd_dev_handle;
+
 #ifndef DECRYPTION_SUPPORT_none
 static const io_dev_connector_t *enc_dev_con;
 static uintptr_t enc_dev_handle;
 #endif
 
+#ifdef BOOT_FROM_SD
+static const io_block_spec_t sd_boot_spec = {
+	.offset = PLAT_A55_IMAGE_SD_BASE,
+	.length = PLAT_A55_IMAGE_SD_SIZE
+};
+#else
 static const io_block_spec_t mem_boot_spec = {
 	.offset = PLAT_A55_FIP_MEM_BASE,
 	.length = PLAT_A55_FIP_MEM_SIZE
+};
+#endif
+
+static unsigned char
+block_buffer[PLAT_A55_BLK_BUF_SIZE] __aligned(PLAT_A55_BLK_BUF_SIZE);
+
+static const io_block_dev_spec_t sd_dev_spec = {
+	.buffer = {
+		.offset	= (size_t)&block_buffer,
+		.length	= PLAT_A55_BLK_BUF_SIZE,
+	},
+	.ops = {
+		.read	= mmc_read_blocks,
+		.write	= mmc_write_blocks,
+	},
+	.block_size	= MMC_BLOCK_SIZE,
 };
 
 static const io_uuid_spec_t bl2_uuid_spec = {
@@ -124,12 +155,10 @@ static const io_uuid_spec_t secure_debug_cert_uuid_spec = {
 #endif
 
 /* By default, virtual platform platforms load images from the FIP */
-static const struct plat_io_policy policies[] = {
+static struct plat_io_policy policies[] = {
 	/* Fip binary load from memory */
 	[FIP_IMAGE_ID] = {
-		&memmap_dev_handle,
-		(uintptr_t)&mem_boot_spec,
-		check_memmap,
+		//set value later base on boot source
 	},
 #ifndef DECRYPTION_SUPPORT_none
 	[ENC_IMAGE_ID] = {
@@ -268,6 +297,22 @@ static int check_fip(const uintptr_t spec)
 	return result;
 }
 
+#ifdef BOOT_FROM_SD
+static int check_sd(const uintptr_t spec)
+{
+	int result = 0;
+	uintptr_t local_image_handle = 0;
+
+	result = io_dev_init(sd_dev_handle, (uintptr_t)NULL);
+	if (result == 0) {
+		result = io_open(sd_dev_handle, spec, &local_image_handle);
+		if (result == 0)
+			io_close(local_image_handle);
+	}
+
+	return result;
+}
+#else
 static int check_memmap(const uintptr_t spec)
 {
 	int result = 0;
@@ -282,6 +327,7 @@ static int check_memmap(const uintptr_t spec)
 
 	return result;
 }
+#endif
 
 #ifndef DECRYPTION_SUPPORT_none
 static int check_enc_fip(const uintptr_t spec)
@@ -313,6 +359,9 @@ void a55_io_setup(void)
 	io_result = register_io_dev_memmap(&memmap_dev_con);
 	assert(io_result == 0);
 
+	io_result = register_io_dev_block(&sd_dev_con);
+	assert(io_result == 0);
+
 #ifndef DECRYPTION_SUPPORT_none
 	io_result = register_io_dev_enc(&enc_dev_con);
 	assert(io_result == 0);
@@ -331,8 +380,39 @@ void a55_io_setup(void)
 				&memmap_dev_handle);
 	assert(io_result == 0);
 
+	io_result = io_dev_open(sd_dev_con, (uintptr_t)&sd_dev_spec,
+				&sd_dev_handle);
+
 	/* Ignore improbable errors in release builds */
 	(void)io_result;
+}
+
+#ifdef BOOT_FROM_SD
+static void a55_sd_boot(void)
+{
+	policies[FIP_IMAGE_ID].dev_handle = &sd_dev_handle;
+	policies[FIP_IMAGE_ID].image_spec = (uintptr_t)&sd_boot_spec;
+	policies[FIP_IMAGE_ID].check = check_sd;
+}
+#else
+static void a55_memmap_boot(void)
+{
+	policies[FIP_IMAGE_ID].dev_handle = &memmap_dev_handle;
+	policies[FIP_IMAGE_ID].image_spec = (uintptr_t)&mem_boot_spec;
+	policies[FIP_IMAGE_ID].check = check_memmap;
+}
+#endif
+
+void a55_boot_source(void)
+{
+#ifdef BOOT_FROM_SD
+	NOTICE("boot from sd card\n");
+	a55_sd_boot();
+#else
+	NOTICE("boot from memory\n");
+	a55_memmap_boot();
+#endif
+
 }
 
 /*

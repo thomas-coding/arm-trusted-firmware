@@ -120,6 +120,7 @@
 //TODO
 #define MAX_IO_HANDLES			7
 #define MAX_IO_DEVICES			7
+#define MAX_IO_BLOCK_DEVICES		4 /* eMMC, SD, SF, DDR */
 
 //TODO
 #define PLAT_VIRT_ADDR_SPACE_SIZE	(1ULL << 32)
@@ -196,5 +197,12 @@
 #define PLAT_A55_SD_BASE		UL(0x70000000)
 #define PLAT_A55_SD_SIZE		UL(0x00010000)
 #define PLAT_A55_SD_CLK_RATE	4000000
+
+/* SD */
+#define PLAT_A55_IMAGE_SD_BASE		(40 * 512)
+#define PLAT_A55_IMAGE_SD_SIZE		(512 * 8 * 1024)
+
+//TODO: FIXME: read 8k once fail
+#define PLAT_A55_BLK_BUF_SIZE		(512)//(8 * 1024)
 
 #endif /* PLATFORM_DEF_H */

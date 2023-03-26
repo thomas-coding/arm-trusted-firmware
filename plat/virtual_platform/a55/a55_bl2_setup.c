@@ -59,7 +59,9 @@ void bl2_platform_setup(void)
 {
 	/* Initialise the IO layer and register platform IO devices */
 	a55_io_setup();
-
+	a55_boot_source();
+	/* Initialize eMMC(or SD) if necessary */
+	a55_boot_device_init();
 #if SECURE_DEBUG
 	/* Check secure debug */
 	verify_debug_cert();

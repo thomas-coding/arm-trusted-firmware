@@ -27,5 +27,6 @@ int verify_debug_cert(void);
 
 void a55_boot_device_init(void);
 void a55_generic_timer_init(void);
+void a55_boot_source(void);
 
 #endif /* A55_PRIVATE_H */
