@@ -82,6 +82,18 @@ void bl1_plat_arch_setup(void)
 				BL_CODE_BASE, BL1_CODE_END);
 }
 
+#if BL2_AT_EL3
+void bl1_plat_set_ep_info(unsigned int image_id,
+		struct entry_point_info *ep_info)
+{
+	if (image_id == BL2_IMAGE_ID) {
+		NOTICE("Change BL2 to EL3\n");
+		ep_info->spsr = SPSR_64(MODE_EL3, MODE_SP_ELX,
+					DISABLE_ALL_EXCEPTIONS);
+	}
+}
+#endif
+
 /*
  * Default implementation for bl1_plat_handle_post_image_load(). This function
  * populates the default arguments to BL2. The BL2 memory layout structure

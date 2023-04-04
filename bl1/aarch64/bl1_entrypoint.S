@@ -10,6 +10,7 @@
 
 	.globl	bl1_entrypoint
 	.globl	bl1_run_bl2_in_root
+	.globl	bl1_run_bl2_at_el3
 
 
 	/* -----------------------------------------------------
@@ -70,10 +71,31 @@ func bl1_entrypoint
 	 */
 #if ENABLE_RME
 	b	bl1_run_bl2_in_root
+#elif IMAGE_AT_EL3
+	b	bl1_run_bl2_at_el3
 #else
 	b	el3_exit
 #endif
 endfunc bl1_entrypoint
+
+	/* -----------------------------------------------------
+	 * void bl1_run_bl2_at_el3();
+	 * This function runs BL2 in EL3.
+	 * -----------------------------------------------------
+	 */
+
+func bl1_run_bl2_at_el3
+	/* ---------------------------------------------
+	 * MMU needs to be disabled because BL2 executes
+	 * in EL3. It will initialize the address space
+	 * according to its own requirements.
+	 * ---------------------------------------------
+	 */
+	bl	disable_mmu_icache_el3
+	tlbi	alle3
+
+	b	el3_exit
+endfunc bl1_run_bl2_in_root
 
 	/* -----------------------------------------------------
 	 * void bl1_run_bl2_in_root();

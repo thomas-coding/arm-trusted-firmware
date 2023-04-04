@@ -637,6 +637,7 @@ endif
 ifeq (${ARCH},aarch64)
 BL1_CPPFLAGS += -DIMAGE_AT_EL3
 ifeq ($(BL2_AT_EL3),1)
+BL1_CPPFLAGS += -DIMAGE_AT_EL3
 BL2_CPPFLAGS += -DIMAGE_AT_EL3
 else
 BL2_CPPFLAGS += -DIMAGE_AT_EL1
@@ -1321,9 +1322,9 @@ $(eval $(call MAKE_BL,bl1))
 endif
 
 ifeq (${NEED_BL2},yes)
-ifeq (${BL2_AT_EL3}, 0)
+#ifeq (${BL2_AT_EL3}, 0)
 FIP_BL2_ARGS := tb-fw
-endif
+#endif
 
 BL2_SOURCES := $(sort ${BL2_SOURCES})
 

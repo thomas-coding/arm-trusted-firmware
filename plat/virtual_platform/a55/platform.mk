@@ -48,6 +48,7 @@ BL1_SOURCES		+=	plat/virtual_platform/a55/a55_helpers.S	\
 
 
 BL2_SOURCES		+=	plat/virtual_platform/a55/a55_helpers.S	\
+					lib/cpus/aarch64/cortex_a55.S	\
 					drivers/ti/uart/${ARCH}/16550_console.S			\
 					plat/virtual_platform/a55/a55_bl2_setup.c		\
 					plat/virtual_platform/a55/a55_io_storage.c	\
